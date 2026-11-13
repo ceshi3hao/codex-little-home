@@ -652,7 +652,7 @@ function buildResident(world, M) {
   const glow = new THREE.PointLight(0x9ef2dd, 0.36, 2.4);
   group.add(glow);
   group.position.set(9.45, 0.63, 3.62);
-  group.scale.setScalar(1.72);
+  group.scale.setScalar(1.30);
   world.root.add(group);
   world.resident = {
     group, tail, finLeft, finRight, glow,

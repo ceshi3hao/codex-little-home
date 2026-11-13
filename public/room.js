@@ -24,7 +24,7 @@ const clock = new THREE.Clock();
 const presets = {
   overview: { yaw: .72, pitch: .93, radius: 19.2, target: [6.4, .62, 4.15] },
   desk: { yaw: -.79, pitch: .76, radius: 7.7, target: [9.5, .78, 3.1] },
-  living: { yaw: .22, pitch: .70, radius: 8.6, target: [6.2, .68, 4.15] }
+  living: { yaw: .22, pitch: .76, radius: 12.4, target: [6.25, .72, 4.35] }
 };
 let yaw = presets.overview.yaw;
 let pitch = presets.overview.pitch;
