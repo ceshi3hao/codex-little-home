@@ -668,7 +668,7 @@ function setResidentMode(world, mode = 'idle') {
   const states = {
     idle: { position: [9.45, 0.63, 3.62], elevation: 0.18, rotation: -0.6 },
     desk: { position: [9.42, 0.73, 3.12], elevation: 0.06, rotation: Math.PI },
-    tv: { position: [6.58, 0.98, 4.58], elevation: 0.12, rotation: Math.PI },
+    tv: { position: [6.00, 0.55, 5.10], elevation: 0.08, rotation: Math.PI },
   };
   const next = states[mode] || states.idle;
   resident.target.set(...next.position);
