@@ -553,6 +553,7 @@ export function createWorld(renderer, { quality = 'balanced' } = {}) {
     ceiling: null,
     tvScreen: null,
     deskScreen: null,
+    resident: null,
     clockHands: [],
     memoryMesh: null,
     lastSkyKey: ''
@@ -572,6 +573,7 @@ export function createWorld(renderer, { quality = 'balanced' } = {}) {
   buildSky(world, M, renderer);
   buildLights(world, M);
   buildLabels(world, M);
+  buildResident(world, M);
 
   world.setCeilingVisible = (visible) => {
     if (world.ceiling) world.ceiling.visible = visible;
@@ -605,8 +607,101 @@ export function createWorld(renderer, { quality = 'balanced' } = {}) {
   world.setMemoryNotes = (lines) => setMemoryNotes(world, lines);
   world.setScreenState = (kind, on) => setScreenState(world, kind, on);
   world.setClock = (hour, minute) => setClock(world, hour, minute);
+  world.setTVVideo = (video) => setTVVideo(world, video);
+  world.setResidentMode = (mode) => setResidentMode(world, mode);
+  world.updateResident = (delta, elapsed) => updateResident(world, delta, elapsed);
 
   return world;
+}
+
+function buildResident(world, M) {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 14), M.teal.clone());
+  body.scale.set(1.25, 0.78, 0.72);
+  group.add(body);
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.185, 18, 12), M.cream.clone());
+  belly.scale.set(1.08, 0.52, 0.52);
+  belly.position.set(0.055, -0.035, 0.15);
+  group.add(belly);
+  const crest = new THREE.Mesh(new THREE.ConeGeometry(0.10, 0.23, 3), M.blue.clone());
+  crest.rotation.z = Math.PI / 2;
+  crest.position.set(0.01, 0.19, 0);
+  group.add(crest);
+  const tail = new THREE.Group();
+  tail.position.set(-0.30, 0, 0);
+  const tailTop = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.30, 3), M.teal.clone());
+  tailTop.rotation.z = Math.PI / 2;
+  tailTop.position.z = 0.10;
+  tail.add(tailTop);
+  const tailBottom = tailTop.clone();
+  tailBottom.position.z = -0.10;
+  tail.add(tailBottom);
+  group.add(tail);
+  for (const z of [-0.09, 0.09]) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 8), M.black.clone());
+    eye.position.set(0.17, 0.055, z);
+    group.add(eye);
+  }
+  const finLeft = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.25, 3), M.fabricBlue.clone());
+  finLeft.rotation.z = -Math.PI / 2;
+  finLeft.position.set(0.01, -0.10, 0.23);
+  group.add(finLeft);
+  const finRight = finLeft.clone();
+  finRight.position.z = -0.23;
+  group.add(finRight);
+  const glow = new THREE.PointLight(0x9ef2dd, 0.36, 2.4);
+  group.add(glow);
+  group.position.set(9.45, 0.63, 3.62);
+  group.scale.setScalar(1.72);
+  world.root.add(group);
+  world.resident = {
+    group, tail, finLeft, finRight, glow,
+    mode: 'idle', position: group.position.clone(), target: group.position.clone(),
+    elevation: 0.18, targetElevation: 0.18, targetRotation: 0,
+  };
+}
+
+function setResidentMode(world, mode = 'idle') {
+  const resident = world.resident;
+  if (!resident) return;
+  resident.mode = mode;
+  const states = {
+    idle: { position: [9.45, 0.63, 3.62], elevation: 0.18, rotation: -0.6 },
+    desk: { position: [9.42, 0.73, 3.12], elevation: 0.06, rotation: Math.PI },
+    tv: { position: [6.58, 0.98, 4.58], elevation: 0.12, rotation: Math.PI },
+  };
+  const next = states[mode] || states.idle;
+  resident.target.set(...next.position);
+  resident.targetElevation = next.elevation;
+  resident.targetRotation = next.rotation;
+}
+
+function updateResident(world, delta, elapsed) {
+  const resident = world.resident;
+  if (!resident) return;
+  const group = resident.group;
+  const before = group.position.clone();
+  group.position.lerp(resident.target, Math.min(1, delta * 2.7));
+  const moving = before.distanceTo(group.position) > 0.002;
+  group.position.y = THREE.MathUtils.lerp(group.position.y, resident.target.y + resident.targetElevation, Math.min(1, delta * 3.5));
+  group.rotation.y = THREE.MathUtils.lerp(group.rotation.y, resident.targetRotation, Math.min(1, delta * 3.2));
+  const flutter = moving ? Math.sin(elapsed * 15) * 0.48 : Math.sin(elapsed * 2.5) * 0.12;
+  resident.tail.rotation.y = flutter;
+  const coding = resident.mode === 'desk';
+  resident.finLeft.rotation.z = coding ? -1.1 + Math.sin(elapsed * 11) * 0.18 : -Math.PI / 2 + flutter * 0.25;
+  resident.finRight.rotation.z = coding ? -1.1 + Math.cos(elapsed * 11) * 0.18 : -Math.PI / 2 - flutter * 0.25;
+  resident.glow.intensity = resident.mode === 'tv' ? 0.52 : coding ? 0.42 : 0.26;
+}
+
+function setTVVideo(world, video) {
+  if (!world.tvScreen || !video) return;
+  if (!world.tvVideoTexture) {
+    world.tvVideoTexture = new THREE.VideoTexture(video);
+    world.tvVideoTexture.colorSpace = THREE.SRGBColorSpace;
+  }
+  world.tvScreen.material.map = world.tvVideoTexture;
+  world.tvScreen.material.emissiveMap = world.tvVideoTexture;
+  world.tvScreen.material.needsUpdate = true;
 }
 
 // 墙 + 门洞/窗洞

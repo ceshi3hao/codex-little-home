@@ -20,6 +20,7 @@ const staticTypes = new Map([
   [".js", "text/javascript; charset=utf-8"],
   [".json", "application/json; charset=utf-8"],
   [".svg", "image/svg+xml"],
+  [".mp4", "video/mp4"],
   [".ico", "image/x-icon"]
 ]);
 
@@ -278,22 +279,31 @@ async function startTask(payload) {
   };
   const modelId = codex.defaultModel?.model || codex.defaultModel?.id;
   if (modelId) threadParams.model = modelId;
-  const threadResult = await codex.call("thread/start", threadParams);
-  task.threadId = threadResult.thread.id;
-  const turnResult = await codex.call("turn/start", {
-    threadId: task.threadId,
-    input: [{ type: "text", text: prompt }],
-    cwd: workspaceRoot,
-    approvalPolicy: "never",
-    sandboxPolicy: { type: "workspaceWrite", writableRoots: [workspaceRoot], networkAccess: false }
-  });
-  task.turnId = turnResult.turn.id;
-  task.status = turnResult.turn.status || "inProgress";
-  task.updatedAt = now();
-  task.events.push({ id: randomUUID(), type: "task", text: "Task sent to Codex.", at: task.updatedAt });
-  await persistState();
-  broadcast({ type: "task", task: publicTask(task) });
-  return task;
+  try {
+    const threadResult = await codex.call("thread/start", threadParams);
+    task.threadId = threadResult.thread.id;
+    const turnResult = await codex.call("turn/start", {
+      threadId: task.threadId,
+      input: [{ type: "text", text: prompt }],
+      cwd: workspaceRoot,
+      approvalPolicy: "never",
+      sandboxPolicy: { type: "workspaceWrite", writableRoots: [workspaceRoot], networkAccess: false }
+    });
+    task.turnId = turnResult.turn.id;
+    task.status = turnResult.turn.status || "inProgress";
+    task.updatedAt = now();
+    task.events.push({ id: randomUUID(), type: "task", text: "Task sent to Codex.", at: task.updatedAt });
+    await persistState();
+    broadcast({ type: "task", task: publicTask(task) });
+    return task;
+  } catch (error) {
+    task.status = "failed";
+    task.updatedAt = now();
+    task.events.push({ id: randomUUID(), type: "error", text: error.message || "Codex task failed to start.", at: task.updatedAt });
+    await persistState();
+    broadcast({ type: "task", task: publicTask(task) });
+    throw error;
+  }
 }
 
 async function interruptTask(id) {

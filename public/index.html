@@ -4,11 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0d1418">
+    <link rel="icon" href="data:,">
     <title>Codex 小窝</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <canvas id="scene" tabindex="0" aria-label="Codex 小窝的可旋转三维室内"></canvas>
+    <video id="television-player" preload="metadata" loop playsinline crossorigin="anonymous" aria-label="客厅电视节目">
+      <source src="media/flower.mp4" type="video/mp4">
+    </video>
     <main id="hud">
       <header class="topbar">
         <a class="brand" href="./" aria-label="Codex 小窝首页"><span class="brand-mark" aria-hidden="true"></span><span>Codex 小窝</span></a>
@@ -28,7 +32,13 @@
         <div class="scene-tools"><button type="button" id="reset-camera">重置镜头</button><span>拖动旋转 · 双指缩放</span></div>
       </section>
 
-      <button class="panel-toggle" id="panel-toggle" type="button" aria-expanded="true" aria-controls="task-panel">任务</button>
+      <nav class="scene-actions" aria-label="小屋互动">
+        <button type="button" data-action="watch" aria-pressed="false"><span class="action-icon" aria-hidden="true">TV</span><span>看电视</span></button>
+        <button type="button" data-action="code" aria-pressed="false"><span class="action-icon" aria-hidden="true">&lt;/&gt;</span><span>去写代码</span></button>
+        <button type="button" data-action="rest" aria-pressed="false"><span class="action-icon" aria-hidden="true">...</span><span>回到小屋</span></button>
+      </nav>
+
+      <button class="panel-toggle" id="panel-toggle" type="button" aria-expanded="false" aria-controls="task-panel">任务</button>
       <aside class="task-panel panel" id="task-panel" aria-label="Codex 任务控制台">
         <form class="task-form" id="task-form">
           <label for="prompt">交给 Codex 的任务</label>

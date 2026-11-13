@@ -181,6 +181,8 @@ $("#task-form").addEventListener("submit", async (event) => {
     const task = (await api("api/tasks", { method:"POST", body:JSON.stringify({ prompt }) })).task;
     selectedTaskId = task.id;
     mergeTask(task);
+    panel.classList.remove("collapsed");
+    toggle.setAttribute("aria-expanded", "true");
     $("#prompt").value = "";
     $("#form-hint").textContent = "任务已交给 Codex，结果会自动出现。";
     $("#output-area").scrollIntoView({ behavior:"smooth", block:"start" });
@@ -212,6 +214,7 @@ toggle.addEventListener("click", () => {
 });
 
 async function boot() {
+  if (matchMedia("(max-width:760px), (max-height:520px)").matches) panel.classList.add("collapsed");
   try {
     const [health, history] = await Promise.all([api("api/health"), api("api/tasks")]);
     modelLabel = health.model?.displayName || health.model?.id || "Codex";
