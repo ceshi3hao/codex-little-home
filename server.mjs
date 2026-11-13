@@ -97,6 +97,8 @@ class CodexAppServer {
     this.starting = null;
     this.nextId = 1;
     this.pending = new Map();
+    this.models = [];
+    this.defaultModel = null;
   }
 
   async start() {
@@ -133,8 +135,15 @@ class CodexAppServer {
       clientInfo: { name: "codex_little_home", title: "Codex Little Home", version: "0.1.0" }
     });
     this.notify("initialized", {});
+    try {
+      const catalog = await this.call("model/list", { limit: 20, includeHidden: false });
+      this.models = Array.isArray(catalog?.data) ? catalog.data : [];
+      this.defaultModel = this.models.find((model) => model.isDefault) || this.models[0] || null;
+    } catch (error) {
+      console.error("Unable to list Codex models:", error.message);
+    }
     this.ready = true;
-    broadcast({ type: "service", status: "ready", at: now() });
+    broadcast({ type: "service", status: "ready", model: this.defaultModel, at: now() });
   }
 
   #failed(error) {
@@ -261,12 +270,15 @@ async function startTask(payload) {
   };
   state.tasks.push(task);
   state.tasks = state.tasks.slice(-40);
-  const threadResult = await codex.call("thread/start", {
+  const threadParams = {
     cwd: workspaceRoot,
     approvalPolicy: "never",
     sandbox: "workspace-write",
     serviceName: "codex_little_home"
-  });
+  };
+  const modelId = codex.defaultModel?.model || codex.defaultModel?.id;
+  if (modelId) threadParams.model = modelId;
+  const threadResult = await codex.call("thread/start", threadParams);
   task.threadId = threadResult.thread.id;
   const turnResult = await codex.call("turn/start", {
     threadId: task.threadId,
@@ -344,7 +356,7 @@ const server = createServer(async (request, response) => {
   const pathname = requestUrl.pathname;
   try {
     if (request.method === "GET" && pathname === "/api/health") {
-      sendJson(response, 200, { ready: codex.ready, workspace: basename(workspaceRoot), workspacePath: workspaceRoot, now: now() });
+      sendJson(response, 200, { ready: codex.ready, workspace: basename(workspaceRoot), workspacePath: workspaceRoot, model: codex.defaultModel, now: now() });
       return;
     }
     if (request.method === "GET" && pathname === "/api/tasks") {
@@ -358,7 +370,7 @@ const server = createServer(async (request, response) => {
         "Connection": "keep-alive",
         "X-Accel-Buffering": "no"
       });
-      response.write(`event: update\ndata: ${JSON.stringify({ type: "service", status: codex.ready ? "ready" : "starting", at: now() })}\n\n`);
+      response.write(`event: update\ndata: ${JSON.stringify({ type: "service", status: codex.ready ? "ready" : "starting", model: codex.defaultModel, at: now() })}\n\n`);
       clients.add(response);
       const heartbeat = setInterval(() => response.write(": keepalive\n\n"), 25_000);
       request.on("close", () => {
