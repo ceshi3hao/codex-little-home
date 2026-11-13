@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test test/smoke.test.mjs",
-    "check": "node --check server.mjs && node --check public/app.js"
+    "check": "node --check server.mjs && node --check public/tasks.js && node --check public/room.js"
   },
   "engines": {
     "node": ">=22"

@@ -1,8 +1,8 @@
 # Codex Little Home
 
-Codex Little Home is a private web workroom for a locally signed-in Codex CLI.
-It gives a phone-friendly room view, task composer, task timeline and streamed
-Codex events without exposing `codex app-server` to the public internet.
+Codex Little Home is a private, interactive 3D workroom for a locally signed-in
+Codex CLI. It adapts the original room's walkable interior, camera controls,
+lighting and desktop display into a phone-friendly Codex task surface.
 
 ## Architecture
 

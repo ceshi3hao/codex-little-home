@@ -28,7 +28,15 @@ test("serves the workroom and rejects malformed tasks", async () => {
     }
     assert.ok(page, lastError?.message || "The test server did not start.");
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /Codex 小窝/);
+    const html = await page.text();
+    assert.match(html, /Codex 小窝/);
+    assert.match(html, /room\.js/);
+    assert.match(html, /tasks\.js/);
+    const room = await fetch(`http://127.0.0.1:${port}/room.js`);
+    assert.equal(room.status, 200);
+    assert.match(await room.text(), /createWorld/);
+    const world = await fetch(`http://127.0.0.1:${port}/room/world.js`);
+    assert.equal(world.status, 200);
     const invalid = await fetch(`http://127.0.0.1:${port}/api/tasks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
