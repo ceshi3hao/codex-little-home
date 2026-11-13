@@ -32,6 +32,7 @@ test("serves the workroom and rejects malformed tasks", async () => {
     assert.match(html, /Codex 小窝/);
     assert.match(html, /room\.js/);
     assert.match(html, /tasks\.js/);
+    assert.match(html, /task-output/);
     const room = await fetch(`http://127.0.0.1:${port}/room.js`);
     assert.equal(room.status, 200);
     assert.match(await room.text(), /createWorld/);
@@ -44,7 +45,10 @@ test("serves the workroom and rejects malformed tasks", async () => {
     });
     assert.equal(invalid.status, 400);
   } finally {
-    child.kill("SIGTERM");
-    await once(child, "exit");
+    if (child.exitCode === null && child.signalCode === null) {
+      const exited = once(child, "exit");
+      child.kill("SIGTERM");
+      await exited;
+    }
   }
 });

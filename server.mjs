@@ -191,12 +191,14 @@ class CodexAppServer {
 
   #handleNotification(message) {
     const params = message.params || {};
+    const item = params.item || {};
     const threadId = params.threadId || params.thread?.id || params.item?.threadId;
     const turnId = params.turnId || params.turn?.id || params.item?.turnId;
     const task = taskForIds(threadId, turnId);
     const event = {
       id: randomUUID(),
       type: message.method || "event",
+      kind: item.type || null,
       text: eventText(message).slice(0, 4000),
       at: now()
     };
