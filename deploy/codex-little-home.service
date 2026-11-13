@@ -1,0 +1,28 @@
+[Unit]
+Description=Codex Little Home web workroom
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/.codex/qq-workspace/outbox/codex-little-home/codex-little-home
+Environment=HOME=/home/ubuntu
+Environment=PATH=/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=HOST=127.0.0.1
+Environment=PORT=23180
+Environment=CODEX_HOME_WORKSPACE=/home/ubuntu/.codex/qq-workspace/outbox/codex-little-home/codex-little-home
+Environment=CODEX_HOME_STATE_FILE=/var/lib/codex-little-home/tasks.json
+ExecStart=/usr/bin/node /home/ubuntu/.codex/qq-workspace/outbox/codex-little-home/codex-little-home/server.mjs
+Restart=on-failure
+RestartSec=3
+StateDirectory=codex-little-home
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/home/ubuntu/.codex/qq-workspace/outbox/codex-little-home/codex-little-home
+
+[Install]
+WantedBy=multi-user.target

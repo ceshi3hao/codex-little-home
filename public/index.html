@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101110">
+    <title>Codex 小窝</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Codex 小窝首页">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Codex 小窝</span>
+        </a>
+        <div class="connection" aria-live="polite">
+          <span class="signal" id="signal" aria-hidden="true"></span>
+          <span id="connection-text">连接本机 Codex</span>
+        </div>
+      </header>
+
+      <section class="workroom" aria-label="Codex 工作室">
+        <div class="scene" id="scene" data-status="idle">
+          <div class="moon-window" aria-hidden="true">
+            <div class="moon"></div>
+            <div class="building building-one"></div>
+            <div class="building building-two"></div>
+            <div class="building building-three"></div>
+          </div>
+          <div class="wall-note note-one" aria-hidden="true"></div>
+          <div class="wall-note note-two" aria-hidden="true"></div>
+          <div class="shelf" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <div class="desk" aria-hidden="true">
+            <div class="monitor"><div class="monitor-glow"></div><span id="screen-status">待命</span><small id="screen-detail">准备接收任务</small></div>
+            <div class="keyboard"></div>
+            <div class="lamp"><b></b><i></i></div>
+            <div class="tea"></div>
+          </div>
+          <div class="floor-light" aria-hidden="true"></div>
+          <div class="scene-caption">
+            <span class="eyebrow">LOCAL WORKROOM</span>
+            <strong id="scene-state">安静待命</strong>
+            <span id="scene-copy">任务会在这里变成可追踪的工作。</span>
+          </div>
+        </div>
+
+        <section class="console" aria-label="任务控制台">
+          <div class="console-heading">
+            <div>
+              <p class="eyebrow">WORKSPACE</p>
+              <h1 id="workspace-name">加载中</h1>
+            </div>
+            <span class="state-tag" id="state-tag">待命</span>
+          </div>
+
+          <form class="task-form" id="task-form">
+            <label for="prompt">交给 Codex 的任务</label>
+            <textarea id="prompt" name="prompt" rows="5" maxlength="8000" placeholder="例如：检查这个项目的构建报错并修复它。" required></textarea>
+            <div class="form-row">
+              <span id="form-hint">只会在这个项目目录内执行。</span>
+              <button class="primary-action" id="start-button" type="submit">开始任务</button>
+            </div>
+          </form>
+
+          <section class="task-area" aria-label="任务记录">
+            <div class="section-head">
+              <h2>工作记录</h2>
+              <span id="task-count">0</span>
+            </div>
+            <div class="task-list" id="task-list" aria-live="polite"></div>
+          </section>
+
+          <section class="feed-area" aria-label="实时事件">
+            <div class="section-head"><h2>实时动态</h2><span class="live-dot">LIVE</span></div>
+            <ol class="event-feed" id="event-feed" aria-live="polite"></ol>
+          </section>
+        </section>
+      </section>
+    </main>
+    <template id="task-template">
+      <article class="task-row">
+        <div class="task-main"><p class="task-prompt"></p><time></time></div>
+        <div class="task-actions"><span class="task-status"></span><button class="stop-button" type="button">停止</button></div>
+      </article>
+    </template>
+    <template id="event-template"><li><time></time><span></span></li></template>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
