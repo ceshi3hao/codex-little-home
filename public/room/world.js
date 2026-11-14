@@ -681,10 +681,10 @@ function updateResident(world, delta, elapsed) {
   if (!resident) return;
   const group = resident.group;
   const before = group.position.clone();
-  group.position.lerp(resident.target, Math.min(1, delta * 2.7));
+  group.position.lerp(resident.target, Math.min(1, delta * 18));
   const moving = before.distanceTo(group.position) > 0.002;
-  group.position.y = THREE.MathUtils.lerp(group.position.y, resident.target.y + resident.targetElevation, Math.min(1, delta * 3.5));
-  group.rotation.y = THREE.MathUtils.lerp(group.rotation.y, resident.targetRotation, Math.min(1, delta * 3.2));
+  group.position.y = THREE.MathUtils.lerp(group.position.y, resident.target.y + resident.targetElevation, Math.min(1, delta * 24));
+  group.rotation.y = THREE.MathUtils.lerp(group.rotation.y, resident.targetRotation, Math.min(1, delta * 20));
   const flutter = moving ? Math.sin(elapsed * 15) * 0.48 : Math.sin(elapsed * 2.5) * 0.12;
   resident.tail.rotation.y = flutter;
   const coding = resident.mode === 'desk';

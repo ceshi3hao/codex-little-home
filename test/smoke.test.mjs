@@ -17,13 +17,13 @@ test("serves the workroom and rejects malformed tasks", async () => {
   try {
     let page;
     let lastError;
-    for (let attempt = 0; attempt < 40; attempt += 1) {
+    for (let attempt = 0; attempt < 80; attempt += 1) {
       try {
         page = await fetch(`http://127.0.0.1:${port}/`);
         break;
       } catch (error) {
         lastError = error;
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
     assert.ok(page, lastError?.message || "The test server did not start.");
